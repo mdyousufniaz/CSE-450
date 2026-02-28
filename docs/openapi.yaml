@@ -1,0 +1,17 @@
+openapi: 3.1.0
+
+info:
+  title: "BUET e-council: Digital Governance & Archiving Platform"
+  description: "An integrated platform for document digitization, meeting workflow automation, and intelligent search."
+  version: "1.0.0"
+
+components:
+  securitySchemes:
+    bearerAuth:            # Defines the JWT requirement globally 
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /auth/login:
+    $ref: './paths/auth.yaml#/login'
