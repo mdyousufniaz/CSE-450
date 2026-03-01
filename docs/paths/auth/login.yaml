@@ -1,0 +1,62 @@
+post:
+  tags:
+    - Authentication
+  summary: "User Login"
+  description: "Authenticates users via email and password to generate a secure JWT token."
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              format: email
+              example: "yousuf.niaz@buet.ac.bd"
+            password:
+              type: string
+              format: password
+              example: "SecurePass123!"
+  responses:
+    '200':
+      description: "200 OK: Login successful. Use the returned token for subsequent requests."
+      content:
+        application/json:
+          example:
+            token: "eyJhbGciOiJIUzI1NiIsInR5..."
+            user_role: "Meeting Workflow Developer"
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+              user_role:
+                type: string
+
+    '400':
+      description: "400 Bad Request: The request body is missing fields or malformed."
+      content:
+        application/json:
+          example:
+            error: "Bad Request"
+            message: "Email and password are required fields."
+
+    '401':
+      description: "401 Unauthorized: Invalid credentials. Verification failed."
+      content:
+        application/json:
+          example:
+            error: "Unauthorized"
+            message: "Invalid email or password."
+
+    '500':
+      description: "500 Internal Server Error: A server-side error occurred"
+      content:
+        application/json:
+          example:
+            error: "Internal Server Error"
+            message: "Database connection failed while verifying user."

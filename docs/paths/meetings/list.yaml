@@ -1,0 +1,65 @@
+get:
+  tags:
+    - Meeting Management
+  summary: "List Council Meetings"
+  description: "Retrieves a list of academic and syndicate meetings with their basic metadata."
+  security:
+    - bearerAuth: [] # Required JWT authentication 
+  parameters:
+    - name: type
+      in: query
+      description: "Filter by meeting category "
+      required: false
+      schema:
+        type: string
+        enum: [academic, syndicate]
+  responses:
+    '200':
+      description: "204 OK: Successfully retrieved the list of meetings."
+      content:
+        application/json:
+          example:
+            - id: "uuid-12345"
+              meetingSerial: "BUET-AC-2026-001"
+              title: "15th Academic Council Meeting"
+              date: "2026-03-15T10:00:00Z"
+              status: "scheduled"
+              category: "academic"
+            - id: "uuid-67890"
+              meetingSerial: "BUET-SYN-2026-004"
+              title: "Syndicate Review Meeting"
+              date: "2026-02-20T14:30:00Z"
+              status: "completed"
+              category: "syndicate"
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                meetingSerial:
+                  type: string
+                title:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+                status:
+                  type: string
+                  enum: [scheduled, in-progress, completed, archived]
+                category:
+                  type: string
+                  enum: [academic, syndicate]
+
+    '401':
+      description: "401 Unauthorized: Invalid or missing JWT token."
+      content:
+        application/json:
+          example:
+            error: "Unauthorized"
+            message: "Authentication is required to view council records."
+
+    '500':
+      description: "500 Internal Server Error: Database retrieval failure."

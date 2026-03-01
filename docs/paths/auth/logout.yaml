@@ -1,0 +1,26 @@
+post:
+  tags:
+    - Authentication
+  summary: "User Logout"
+  description: "Invalidates the current session and blacklists the JWT token."
+  security:
+    - bearerAuth: []
+  responses:
+    '204':
+      description: "204 No Content: Logout successful. The token is no longer valid."
+      
+    '401':
+      description: "401 Unauthorized: Invalid or missing token. Session might already be closed."
+      content:
+        application/json:
+          example:
+            error: "Unauthorized"
+            message: "Authentication token is required for logout."
+            
+    '500':
+      description: "500 Internal Server Error: Failed to process logout on the server."
+      content:
+        application/json:
+          example:
+            error: "Internal Server Error"
+            message: "An unexpected error occurred while destroying the session."

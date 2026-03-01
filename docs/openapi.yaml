@@ -14,4 +14,18 @@ components:
 
 paths:
   /auth/login:
-    $ref: './paths/auth.yaml#/login'
+    $ref: './paths/auth/login.yaml'
+  /auth/refresh:
+    $ref: './paths/auth/refresh_token.yaml'
+  /auth/logout:
+    $ref: './paths/auth/logout.yaml'
+
+  /meetings:
+    $ref: './paths/meetings/list.yaml'
+  /meetings/create:
+    $ref: './paths/meetings/create.yaml'
+  /meetings/{id}:
+    $ref: './paths/meetings/update.yaml'
+  /meetings/{id}/participants:
+    $ref: './paths/meetings/add-participants.yaml'
+  

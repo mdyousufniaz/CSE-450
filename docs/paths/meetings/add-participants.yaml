@@ -1,0 +1,79 @@
+post:
+  tags:
+    - Participant Management
+  summary: "Add Participants to Meeting"
+  description: "Assigns a list of member IDs to a specific meeting. Restricted to Admin and Staff roles."
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: "The unique UUID of the meeting."
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - member_ids
+          properties:
+            member_ids:
+              type: array
+              items:
+                type: string
+                format: uuid
+              example: ["uuid-member-1", "uuid-member-2"]
+  responses:
+    '200':
+      description: "200 OK: Participants added successfully."
+      content:
+        application/json:
+          example:
+            message: "Participants successfully linked to the meeting."
+            total_added: 2
+            current_participant_count: 15
+
+    '400':
+      description: "400 Bad Request: Invalid input data."
+      content:
+        application/json:
+          example:
+            error: "Bad Request"
+            message: "The 'member_ids' field must be a non-empty array of valid UUIDs."
+
+    '401':
+      description: "401 Unauthorized: Authentication token is missing or expired."
+      content:
+        application/json:
+          example:
+            error: "Unauthorized"
+            message: "You must be logged in to manage participants."
+
+    '403':
+      description: "403 Forbidden: Insufficient permissions."
+      content:
+        application/json:
+          example:
+            error: "Forbidden"
+            message: "Access Denied. Your role ('Member') does not allow adding participants. Only Admin or Staff can perform this action."
+
+    '404':
+      description: "404 Not Found: Meeting not found."
+      content:
+        application/json:
+          example:
+            error: "Not Found"
+            message: "Meeting with ID '550e8400-e29b-41d4-a716-446655440000' does not exist."
+
+    '500':
+      description: "500 Internal Server Error: Database failure."
+      content:
+        application/json:
+          example:
+            error: "Internal Server Error"
+            message: "An error occurred while saving the participant list."

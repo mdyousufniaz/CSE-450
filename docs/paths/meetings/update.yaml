@@ -1,0 +1,104 @@
+patch:
+  tags:
+    - Meeting Management
+  summary: "Update Meeting Details"
+  description: "Updates specific fields of an existing meeting. Restricted to 'admin' role. Checks for serial number/type conflicts."
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: "The unique UUID of the meeting to update."
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    description: "Fields to update. All fields are optional."
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            serialNumber:
+              type: string
+              example: "BUET-AC-2026-002"
+            type:
+              type: string
+              enum: [syndicate, academic]
+            title:
+              type: string
+            description:
+              type: string
+            meetingDate:
+              type: string
+              format: date-time
+            meetingStatus:
+              type: string
+              enum: [scheduled, in-progress, completed, archived, cancelled]
+            meetingLink:
+              type: string
+              format: uri
+              example: "https://meet.google.com/abc-defg-hij"
+  responses:
+    '200':
+      description: "200 OK: Meeting updated successfully."
+      content:
+        application/json:
+          example:
+            message: "Update successful"
+            id: "550e8400-e29b-41d4-a716-446655440000"
+            updatedFields: 
+              - "serialNumber"
+              - "meetingLink"
+              - "meetingStatus"
+            updatedAt: "2026-03-01T10:30:00Z"
+
+    '400':
+      description: "400 Bad Request: Invalid data provided (e.g., malformed date or invalid enum)."
+      content:
+        application/json:
+          example:
+            error: "Bad Request"
+            message: "Invalid date format for 'meetingDate'. Expected ISO 8601 format."
+            details: "The value '25th March' is not a valid date-time string."
+
+    '401':
+      description: "401 Unauthorized: Authentication failed or token expired."
+      content:
+        application/json:
+          example:
+            error: "Unauthorized"
+            message: "Your session has expired. Please log in again to update meeting records."
+
+    '403':
+      description: "403 Forbidden: Authenticated user lacks 'admin' role privileges."
+      content:
+        application/json:
+          example:
+            error: "Forbidden"
+            message: "Access Denied. Only users with administrative privileges can modify meeting records."
+
+    '404':
+      description: "404 Not Found: The specified meeting ID does not exist."
+      content:
+        application/json:
+          example:
+            error: "Not Found"
+            message: "Meeting with ID '550e8400-e29b-41d4-a716-446655440000' was not found in the council archives."
+
+    '409':
+      description: "409 Conflict: Update failed due to a duplicate serial number or conflicting state."
+      content:
+        application/json:
+          example:
+            error: "Conflict"
+            message: "The serial number 'BUET-AC-2026-002' is already assigned to an existing Syndicate meeting."
+
+    '500':
+      description: "500 Internal Server Error: Unexpected server-side or database failure."
+      content:
+        application/json:
+          example:
+            error: "Internal Server Error"
+            message: "An unexpected database error occurred while persisting meeting changes. Please try again later."

@@ -1,0 +1,74 @@
+post:
+  tags:
+    - Meeting Management
+  summary: "Create a New Meeting"
+  description: "Allows authorized administrators to initialize a new academic or syndicate meeting. Restricted to 'admin' role."
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - serialNumber
+            - type
+          properties:
+            serialNumber:
+              type: string
+              description: "Unique identifier for the meeting (e.g., BUET-AC-2026-001)."
+              example: "BUET-AC-2026-001"
+            type:
+              type: string
+              enum: [syndicate, academic]
+              description: "The category of the council meeting."
+            title:
+              type: string
+              example: "15th Academic Council Session"
+            description:
+              type: string
+              example: "Discussing new curriculum changes and research grants."
+            meetingDate:
+              type: string
+              format: date-time
+              example: "2026-03-25T09:00:00Z"
+  responses:
+    '201':
+      description: "201 Created: Meeting initialized successfully."
+      content:
+        application/json:
+          example:
+            message: "Meeting created successfully"
+            id: "uuid-98765"
+            serialNumber: "BUET-AC-2026-001"
+
+    '400':
+      description: "400 Bad Request: Missing required fields or invalid data format."
+      content:
+        application/json:
+          example:
+            error: "Bad Request"
+            message: "serialNumber and type are mandatory."
+
+    '401':
+      description: "401 Unauthorized: Authentication token is missing or expired."
+
+    '403':
+      description: "403 Forbidden: Only users with 'admin' privileges can create meetings."
+      content:
+        application/json:
+          example:
+            error: "Forbidden"
+            message: "Access denied. Admin role required."
+
+    '409':
+      description: "409 Conflict: A meeting with this serial number and type already exists."
+      content:
+        application/json:
+          example:
+            error: "Conflict"
+            message: "Meeting serial number must be unique."
+
+    '500':
+      description: "500 Internal Server Error: Server-side failure during creation."

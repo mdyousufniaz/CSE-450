@@ -1,0 +1,40 @@
+post:
+  tags:
+    - Authentication
+  summary: "Refresh Access Token"
+  description: "Exchange a refresh token for a new JWT access token to maintain the session."
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: "200 OK: New token generated successfully."
+      content:
+        application/json:
+          example:
+            token: "new_eyJhbGciOiJIUzI1NiIsInR5..."
+            expires_in: 3600
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+                description: "The new JWT access token."
+              expires_in:
+                type: integer
+                description: "Seconds until the new token expires."
+
+    '401':
+      description: "401 Unauthorized: Refresh token is invalid or has been blacklisted."
+      content:
+        application/json:
+          example:
+            error: "Unauthorized"
+            message: "Refresh token expired. Please login again."
+
+    '500':
+      description: "500 Internal Server Error: Problem verifying the token."
+      content:
+        application/json:
+          example:
+            error: "Internal Server Error"
+            message: "An unexpected error occurred during token rotation."
