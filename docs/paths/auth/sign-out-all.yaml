@@ -1,0 +1,42 @@
+post:
+  tags:
+    - Authentication
+  summary: Sign out from all devices
+  description: Terminates every active session associated with the authenticated user's account.
+  operationId: signOutAll
+  security:
+    - cookieAuth: []
+  responses:
+    '200':
+      description: Successfully logged out of all devices
+      headers:
+        Set-Cookie:
+          description: Clears the local session_token cookie.
+          schema:
+            type: string
+            example: session_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: "Logged out from all active sessions."
+
+    '401':
+      description: Unauthorized - No active session found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Unauthorized"

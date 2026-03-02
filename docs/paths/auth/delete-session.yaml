@@ -1,0 +1,58 @@
+delete:
+  tags:
+    - Authentication
+  summary: Terminate a specific session
+  description: Revokes a specific session by ID. Users cannot terminate their currently active session via this endpoint.
+  operationId: deleteSession
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: sessionId
+      in: path
+      required: true
+      description: The unique ID of the session to terminate.
+      schema:
+        type: string
+      example: "sess_54321"
+  responses:
+    '200':
+      description: Session successfully terminated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: "Session terminated successfully."
+
+    '403':
+      description: Forbidden - Cannot terminate the current active session
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Cannot remove current session. Please use the sign-out endpoint instead."
+
+    '401':
+      description: Unauthorized - Invalid or missing session cookie
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Unauthorized"

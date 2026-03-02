@@ -1,0 +1,73 @@
+post:
+  tags:
+    - Authentication
+  summary: Authenticate user
+  description: Verifies credentials and returns a session token via an HttpOnly cookie.
+  operationId: signIn
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              format: email
+              example: jestuser@example.com
+            password:
+              type: string
+              format: password
+              example: "password123"
+            location:
+              type: string
+              example: "Device 1"
+              description: Identifier for the current login device/location.
+  responses:
+    '200':
+      description: Login successful
+      headers:
+        Set-Cookie:
+          description: Contains the session_token. Attributes include HttpOnly and Secure.
+          schema:
+            type: string
+            example: session_token=abc123xyz; HttpOnly; Secure; SameSite=Strict
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: A public-facing token identifier (optional, as cookie is primary).
+                    example: "eyJhbG..."
+                  session_id:
+                    type: string
+                    example: "sess_507f1f77bcf86cd799439011"
+                    description: Unique ID for the newly created session.
+
+    '401':
+      description: Unauthorized - Invalid email or password
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error_code:
+                type: string
+                example: "INVALID_CREDENTIALS"
+              message:
+                type: string
+                example: "The email or password provided is incorrect."

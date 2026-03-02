@@ -1,0 +1,47 @@
+get:
+  tags:
+    - Authentication
+  summary: Get current user profile
+  description: Returns the profile information for the currently authenticated user based on the session cookie.
+  operationId: getMe
+  security:
+    - cookieAuth: []
+  responses:
+    '200':
+      description: User details retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "user_98765"
+                  username:
+                    type: string
+                    example: "jestuser"
+                  email:
+                    type: string
+                    example: "jestuser@example.com"
+                  location:
+                    type: string
+                    example: "Test City"
+    '401':
+      description: Unauthorized - No valid session found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Access denied. No token provided."

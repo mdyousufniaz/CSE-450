@@ -1,0 +1,42 @@
+post:
+  tags:
+    - Authentication
+  summary: Sign out current session
+  description: Terminates the user's current active session and clears the authentication cookie.
+  operationId: signOut
+  security:
+    - cookieAuth: []
+  responses:
+    '200':
+      description: Signed out successfully
+      headers:
+        Set-Cookie:
+          description: Clears the session_token cookie.
+          schema:
+            type: string
+            example: session_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: "Successfully signed out."
+
+    '401':
+      description: Unauthorized - No active session found to sign out from
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Access denied. No token provided."

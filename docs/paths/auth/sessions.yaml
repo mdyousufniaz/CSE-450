@@ -1,0 +1,57 @@
+get:
+  tags:
+    - Authentication
+  summary: List active sessions
+  description: Retrieves a list of all active sessions associated with the authenticated user's account.
+  operationId: getSessions
+  security:
+    - cookieAuth: []
+  responses:
+    '200':
+      description: A list of active sessions
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: The unique session identifier.
+                          example: "sess_12345"
+                        location:
+                          type: string
+                          description: The device or location info provided at sign-in.
+                          example: "Device 2"
+                        is_current:
+                          type: boolean
+                          description: Indicates if this session belongs to the current request.
+                          example: false
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: "2024-03-20T10:00:00Z"
+
+    '401':
+      description: Unauthorized - Invalid or missing session cookie
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Unauthorized access"
