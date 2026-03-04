@@ -1,0 +1,122 @@
+post:
+  tags:
+    - Tags
+  summary: Create a new tag
+  description: >-
+    Adds a new tag to the system global list. Tags can later be attached to 
+    Agendas or Resolutions for better searchability.
+  operationId: createTag
+  security:
+    - cookieAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: The unique name of the tag.
+              example: "Urgent"
+  responses:
+    '201':
+      description: Created - Tag successfully added.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  tag_id:
+                    type: string
+                    format: uuid
+                    example: "tag_5522-wxyz"
+          example:
+            success: true
+            data:
+              tag_id: "tag_5522-wxyz"
+
+    '400':
+      description: Bad Request - Missing required name or invalid characters.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_TAG_NAME"
+            message: "Tag name cannot be empty or contain special characters."
+
+    '401':
+      description: Unauthorized - Login required.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "Authentication is required to track template usage."
+
+    '403':
+      description: Forbidden - Only administrators can create new global tags.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INSUFFICIENT_PERMISSIONS"
+            message: "You do not have the 'admin' role required to create tags."
+
+    '409':
+      description: Conflict - Tag name already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "DUPLICATE_TAG"
+            message: "A tag with the name 'Urgent' already exists."
+
+    '415':
+      description: Unsupported Media Type - Wrong Content-Type header.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNSUPPORTED_MEDIA"
+            message: "Request must be application/json."
+
+    '422':
+      description: Unprocessable Entity - Tag name too long.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "VALIDATION_ERROR"
+            message: "Tag name exceeds the 50-character limit."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "Database failed to increment counter."

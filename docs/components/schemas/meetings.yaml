@@ -1,0 +1,159 @@
+CreateMeetingRequest:
+  type: object
+  required:
+    - serial_no
+    - type
+  properties:
+    serial_no:
+      type: integer
+      description: The sequence number of the meeting (e.g., 124).
+      example: 124
+    title:
+      type: string
+      example: "Annual Budget Review"
+    description:
+      type: string
+      example: "Discussion regarding the academic budget for 2026."
+    meeting_date:
+      type: string
+      format: date-time
+      example: "2026-05-20T14:30:00Z"
+    type:
+      type: string
+      enum: [SYNDICATE, ACADEMIC]
+      example: "SYNDICATE"
+
+MeetingListResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: object
+      properties:
+        total_count:
+          type: integer
+          example: 45
+        meetings:
+          type: array
+          items:
+            $ref: '#/MeetingBrief'
+
+MeetingBrief:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "meet_789"
+    serial_no:
+      type: integer
+      example: 124
+    title:
+      type: string
+      example: "124th Syndicate Meeting"
+    meeting_date:
+      type: string
+      format: date-time
+      example: "2026-03-03T10:00:00Z"
+    status:
+      type: string
+      enum: [DRAFT, ONGOING, COMPLETED, CANCELLED]
+      example: "COMPLETED"
+
+MeetingDetailResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      $ref: '#/MeetingFullDetail'
+
+MeetingFullDetail:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    serial_no:
+      type: integer
+      example: 124
+    title:
+      type: string
+      example: "Quarterly Syndicate Session"
+    description:
+      type: string
+      example: "Discussion on university infrastructure and policy changes."
+    meeting_link:
+      type: string
+      format: uri
+      example: "https://zoom.us/j/123456789"
+    transcript_url:
+      type: string
+      format: uri
+      example: "https://api.university.edu/v1/meetings/124/transcript.txt"
+    meeting_date:
+      type: string
+      format: date-time
+    type:
+      type: string
+      enum: [SYNDICATE, ACADEMIC]
+    status:
+      type: string
+      enum: [DRAFT, ONGOING, COMPLETED, CANCELLED]
+    location:
+      type: string
+      example: "Main Conference Hall"
+    agenda_pdf_url:
+      type: string
+      format: uri
+      example: "https://storage.university.edu/meetings/124_agenda.pdf"
+    resolution_pdf_url:
+      type: string
+      format: uri
+      example: "https://storage.university.edu/meetings/124_resolution.pdf"
+
+UpdateMeetingRequest:
+  type: object
+  properties:
+    serial_no:
+      type: integer
+      example: 125
+    title:
+      type: string
+    description:
+      type: string
+    meeting_date:
+      type: string
+      format: date-time
+    type:
+      type: string
+      enum: [SYNDICATE, ACADEMIC]
+    meeting_link:
+      type: string
+      format: uri
+    transcript:
+      type: string
+    agenda_file:
+      type: string
+      format: binary
+      description: Upload the agenda PDF.
+    resolution_file:
+      type: string
+      format: binary
+      description: Upload the resolution PDF.
+
+ParticipantSyncRequest:
+  type: object
+  required:
+    - member_ids
+  properties:
+    member_ids:
+      type: array
+      description: List of user/member UUIDs who should be in this meeting.
+      items:
+        type: string
+        format: uuid
+      example: ["550e8400-e29b-41d4-a716-446655440000", "660f9511-f30c-52e5-b827-557766551111"]

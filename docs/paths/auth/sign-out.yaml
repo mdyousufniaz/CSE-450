@@ -2,41 +2,57 @@ post:
   tags:
     - Authentication
   summary: Sign out current session
-  description: Terminates the user's current active session and clears the authentication cookie.
+  description: Terminates the user's current active session on the server and instructs the browser to clear the authentication cookie.
   operationId: signOut
   security:
     - cookieAuth: []
+    - bearerAuth: []
   responses:
     '200':
-      description: Signed out successfully
+      description: OK - Signed out successfully.
       headers:
         Set-Cookie:
-          description: Clears the session_token cookie.
+          description: Clears the session_token cookie by setting its expiration to the past.
           schema:
             type: string
-            example: session_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly
+            example: session_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: true
-              message:
-                type: string
-                example: "Successfully signed out."
+            $ref: '../../components/schemas/common.yaml#/SuccessWrapper'
+          example:
+            success: true
+            message: "Successfully signed out. Your session has been invalidated."
 
     '401':
-      description: Unauthorized - No active session found to sign out from
+      description: Unauthorized - No active session found to sign out from.
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: false
-              message:
-                type: string
-                example: "Access denied. No token provided."
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "NO_ACTIVE_SESSION"
+            message: "You are not currently logged in or your session has already expired."
+
+    '429':
+      description: Too Many Requests - Logout spam protection.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RATE_LIMIT_EXCEEDED"
+            message: "Too many requests. Please try again later."
+
+    '500':
+      description: Internal Server Error - Failed to invalidate session in the database.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "LOGOUT_FAILED"
+            message: "An error occurred on the server while trying to terminate your session."

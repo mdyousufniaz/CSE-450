@@ -1,0 +1,207 @@
+post:
+  tags:
+    - Agendas
+  summary: Create a new agenda item
+  description: >-
+    Adds a new agenda item (agendum) to a specific meeting. 
+    Supports regular and supplementary items.
+  operationId: createAgenda
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: meeting_id
+      in: path
+      required: true
+      description: The ID of the meeting this agenda belongs to.
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/agendas.yaml#/CreateAgendaRequest'
+  responses:
+    '201':
+      description: Created - Agenda item successfully added.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  agenda_id:
+                    type: string
+                    format: uuid
+                    example: "ag-507f19"
+          example:
+            success: true
+            data:
+              agenda_id: "ag-507f19"
+
+    '400':
+      description: Bad Request - Missing required fields or invalid data.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_INPUT"
+            message: "The 'serial' must be a positive integer."
+
+    '401':
+      description: Unauthorized - No valid session found.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "Authentication is required to create agendas."
+
+    '403':
+      description: Forbidden - User doesn't have permission to edit this meeting.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "ACCESS_DENIED"
+            message: "You do not have permission to add agendas to this meeting type."
+
+    '404':
+      description: Not Found - The meeting does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MEETING_NOT_FOUND"
+            message: "Cannot add an agenda to a meeting that doesn't exist."
+
+    '409':
+      description: Conflict - Serial number already exists in this meeting.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "DUPLICATE_SERIAL"
+            message: "Agenda item with serial 5 already exists in this meeting."
+
+    '423':
+      description: Locked - The meeting is completed or finalized.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MEETING_LOCKED"
+            message: "This meeting is finalized and cannot accept new agenda items."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "An unexpected error occurred while saving the agenda item."
+
+get:
+  tags:
+    - Agendas
+  summary: List all agendas for a specific meeting
+  description: >-
+    Retrieves a list of all agenda items associated with a meeting. 
+    Includes linked resolution IDs if a resolution has been drafted.
+  operationId: listAgendasByMeeting
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: meeting_id
+      in: path
+      required: true
+      description: The unique UUID of the meeting.
+      schema:
+        type: string
+        format: uuid
+      example: "meet_507f1f77bcf86cd799439011"
+  responses:
+    '200':
+      description: OK - List of agendas retrieved.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/agendas.yaml#/MeetingAgendaListResponse'
+          example:
+            success: true
+            data:
+              - id: "ag_111"
+                body: "Approval of the previous meeting minutes."
+                is_suppli_agendum: false
+                current_version: 2
+                resolution_id: "res_222"
+              - id: "ag_112"
+                body: "Emergency discussion on campus lighting."
+                is_suppli_agendum: true
+                current_version: 1
+                resolution_id: null
+
+    '401':
+      description: Unauthorized - No active session.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "You must be signed in to view agendas."
+
+    '403':
+      description: Forbidden - User cannot access this meeting's data.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "FORBIDDEN"
+            message: "You do not have permission to view agendas for Syndicate meetings."
+
+    '404':
+      description: Not Found - Meeting does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MEETING_NOT_FOUND"
+            message: "The requested meeting ID was not found."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "Failed to retrieve agendas due to a database error."

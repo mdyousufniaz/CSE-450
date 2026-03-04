@@ -1,74 +1,101 @@
 post:
   tags:
-    - Meeting Management
-  summary: "Create a New Meeting"
-  description: "Allows authorized administrators to initialize a new academic or syndicate meeting. Restricted to 'admin' role."
+    - Meetings
+  summary: Create a new meeting
+  description: Initializes a new meeting record. Checks for duplicate serial numbers within the same meeting type.
+  operationId: createMeeting
   security:
-    - bearerAuth: []
+    - cookieAuth: []
   requestBody:
     required: true
     content:
       application/json:
         schema:
-          type: object
-          required:
-            - serialNumber
-            - type
-          properties:
-            serialNumber:
-              type: string
-              description: "Unique identifier for the meeting (e.g., BUET-AC-2026-001)."
-              example: "BUET-AC-2026-001"
-            type:
-              type: string
-              enum: [syndicate, academic]
-              description: "The category of the council meeting."
-            title:
-              type: string
-              example: "15th Academic Council Session"
-            description:
-              type: string
-              example: "Discussing new curriculum changes and research grants."
-            meetingDate:
-              type: string
-              format: date-time
-              example: "2026-03-25T09:00:00Z"
+          $ref: '../../components/schemas/meetings.yaml#/CreateMeetingRequest'
   responses:
     '201':
-      description: "201 Created: Meeting initialized successfully."
+      description: Created - Meeting successfully initialized.
       content:
         application/json:
-          example:
-            message: "Meeting created successfully"
-            id: "uuid-98765"
-            serialNumber: "BUET-AC-2026-001"
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: "meet_abc123"
+                  message:
+                    type: string
+                    example: "Meeting created successfully."
 
     '400':
-      description: "400 Bad Request: Missing required fields or invalid data format."
+      description: Bad Request - Missing required fields (serial_no or type).
       content:
         application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
           example:
-            error: "Bad Request"
-            message: "serialNumber and type are mandatory."
+            success: false
+            error_code: "VALIDATION_ERROR"
+            message: "serial_no and type are required fields."
 
     '401':
-      description: "401 Unauthorized: Authentication token is missing or expired."
+      description: Unauthorized - Session missing or expired.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "You must be logged in to create a meeting."
 
     '403':
-      description: "403 Forbidden: Only users with 'admin' privileges can create meetings."
+      description: Forbidden - Insufficient permissions (e.g., Reader role trying to create).
       content:
         application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
           example:
-            error: "Forbidden"
-            message: "Access denied. Admin role required."
+            success: false
+            error_code: "FORBIDDEN_ACCESS"
+            message: "Only administrators can create new meetings."
 
     '409':
-      description: "409 Conflict: A meeting with this serial number and type already exists."
+      description: Conflict - A meeting with this serial number and type already exists.
       content:
         application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
           example:
-            error: "Conflict"
-            message: "Meeting serial number must be unique."
+            success: false
+            error_code: "DUPLICATE_MEETING"
+            message: "A Syndicate meeting with serial number 124 already exists."
+
+    '422':
+      description: Unprocessable Entity - Invalid date format or logic errors.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_DATA"
+            message: "The meeting date cannot be in the past."
 
     '500':
-      description: "500 Internal Server Error: Server-side failure during creation."
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "Database failed to persist meeting record."

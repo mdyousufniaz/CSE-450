@@ -1,0 +1,71 @@
+SignInRequest:
+  type: object
+  required:
+    - email
+    - password
+  properties:
+    email:
+      type: string
+      format: email
+      example: "admin@university.edu"
+    password:
+      type: string
+      format: password
+      example: "SecurePass123!"
+    location:
+      type: string
+      description: Identifier for the current login device.
+      example: "Chrome on MacOS"
+
+AuthSuccess:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Public JWT or identifier.
+          example: "eyJhbG..."
+        session_id:
+          type: string
+          example: "sess_987654321"
+        user:
+          $ref: './users.yaml#/User'
+
+SessionListResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/SessionItem'
+
+SessionItem:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "sess_507f1f77bcf86cd799439011"
+    location:
+      type: string
+      description: Device or location info (e.g., "Chrome on Linux Mint").
+      example: "Device 2"
+    is_current:
+      type: boolean
+      description: True if this is the session currently making the request.
+      example: true
+    created_at:
+      type: string
+      format: date-time
+      example: "2026-03-03T21:00:00Z"

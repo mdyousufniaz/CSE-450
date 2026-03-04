@@ -1,0 +1,124 @@
+patch:
+  tags:
+    - Agendas
+  summary: Update an agenda item
+  description: >-
+    Updates the details of an existing agenda item. 
+    Changes will be saved as a new version in the `agenda_versions` table.
+  operationId: updateAgenda
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: agenda_id
+      in: path
+      required: true
+      description: The unique UUID of the agenda item.
+      schema:
+        type: string
+        format: uuid
+      example: "ag_507f1f77"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/agendas.yaml#/UpdateAgendaRequest'
+  responses:
+    '200':
+      description: OK - Agenda updated successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  agenda_id:
+                    type: string
+                    format: uuid
+                    example: "ag_507f1f77"
+          example:
+            success: true
+            data:
+              agenda_id: "ag_507f1f77"
+
+    '400':
+      description: Bad Request - Invalid data format.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_DATA"
+            message: "Serial must be a positive integer."
+
+    '401':
+      description: Unauthorized - Session missing or expired.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "Authentication is required to update agendas."
+
+    '403':
+      description: Forbidden - Insufficient permissions for this meeting type.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "FORBIDDEN"
+            message: "You do not have permission to modify this agenda."
+
+    '404':
+      description: Not Found - Agenda ID does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AGENDA_NOT_FOUND"
+            message: "No agenda found with the provided ID."
+
+    '409':
+      description: Conflict - Serial number conflict within the meeting.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "DUPLICATE_SERIAL"
+            message: "Another agenda item in this meeting already uses serial 5."
+
+    '423':
+      description: Locked - The parent meeting is closed or locked.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MEETING_LOCKED"
+            message: "Cannot update agenda items for a locked or ended meeting."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "Database error occurred while processing the update."

@@ -1,0 +1,28 @@
+# docs/components/schemas/common.yaml
+ErrorResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: false
+    error_code:
+      type: string
+      description: A machine-readable error identifier.
+      example: "INVALID_CREDENTIALS"
+    message:
+      type: string
+      description: A human-readable error message.
+      example: "The email or password provided is incorrect."
+
+SuccessWrapper:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: object
+      description: The actual payload of the response.
+    message:
+      type: string
+      example: "Operation completed successfully."

@@ -1,0 +1,108 @@
+patch:
+  tags:
+    - Templates
+  summary: Increment template usage count
+  description: >-
+    Increases the `used_count` of a specific template by one. 
+    This is typically called by the frontend whenever a user selects 
+    a template to populate an agenda or resolution.
+  operationId: incrementTemplateUsage
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: template_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: "temp_4455-efgh"
+  responses:
+    '200':
+      description: OK - Counter incremented.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              data:
+                type: object
+                properties:
+                  template_id:
+                    type: string
+                    format: uuid
+                  new_count:
+                    type: integer
+          example:
+            success: true
+            data:
+              template_id: "temp_4455-efgh"
+              new_count: 42
+
+    '401':
+      description: Unauthorized - User must be logged in.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "Authentication is required to track template usage."
+
+    '403':
+      description: Forbidden - Visibility issues.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "FORBIDDEN_ACTION"
+            message: "You cannot increment the usage of a private template that doesn't belong to you."
+
+    '404':
+      description: Not Found - Template does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "TEMPLATE_NOT_FOUND"
+            message: "The template ID provided does not exist."
+
+    '409':
+      description: Conflict - Concurrent update issues.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UPDATE_CONFLICT"
+            message: "The usage count could not be updated due to a database lock. Please try again."
+
+    '429':
+      description: Too Many Requests - Spam prevention.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RATE_LIMIT_EXCEEDED"
+            message: "Usage increments are limited to prevent count inflation."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "Database failed to increment counter."

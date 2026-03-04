@@ -1,0 +1,201 @@
+patch:
+  tags:
+    - Templates
+  summary: Update an existing template
+  description: >-
+    Updates specific fields of a template. Only the creator of the template 
+    or a high-level administrator can perform this action.
+  operationId: updateTemplate
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: template_id
+      in: path
+      required: true
+      description: The unique UUID of the template to update.
+      schema:
+        type: string
+        format: uuid
+      example: "temp_4455-efgh"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/templates.yaml#/UpdateTemplateRequest'
+  responses:
+    '200':
+      description: OK - Template updated successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              data:
+                type: object
+                properties:
+                  template_id:
+                    type: string
+                    format: uuid
+          example:
+            success: true
+            data:
+              template_id: "temp_4455-efgh"
+
+    '400':
+      description: Bad Request - Invalid data format.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_INPUT"
+            message: "Visibility must be either 'public' or 'private'."
+
+    '401':
+      description: Unauthorized - User is not logged in.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "Authentication is required to update templates."
+
+    '403':
+      description: Forbidden - User does not own this template.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "FORBIDDEN_ACTION"
+            message: "You do not have permission to modify this template as you are not the owner."
+
+    '404':
+      description: Not Found - Template ID does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "TEMPLATE_NOT_FOUND"
+            message: "No template found with the ID: temp_4455-efgh"
+
+    '422':
+      description: Unprocessable Entity - Validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "VALIDATION_ERROR"
+            message: "The 'body' field cannot be empty if provided."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INTERNAL_ERROR"
+            message: "An unexpected error occurred while updating the database."
+
+delete:
+  tags:
+    - Templates
+  summary: Delete a template
+  description: >-
+    Permanently removes a template from the system. 
+    This action cannot be undone.
+  operationId: deleteTemplate
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: template_id
+      in: path
+      required: true
+      description: The UUID of the template to be deleted.
+      schema:
+        type: string
+        format: uuid
+      example: "temp_4455-efgh"
+  responses:
+    '200':
+      description: OK - Template deleted successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+          example:
+            success: true
+            message: "Template 'temp_4455-efgh' has been deleted."
+
+    '401':
+      description: Unauthorized - User not authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "You must be logged in to delete templates."
+
+    '403':
+      description: Forbidden - User is not the owner of the template.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "FORBIDDEN_ACTION"
+            message: "You do not have permission to delete this template. Only the creator can remove it."
+
+    '404':
+      description: Not Found - Template ID does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "TEMPLATE_NOT_FOUND"
+            message: "The template you are trying to delete does not exist or was already removed."
+
+    '410':
+      description: Gone - The resource was intentionally removed and is no longer available.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RESOURCE_GONE"
+            message: "This template has been archived and permanently removed from the active database."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "DB_DELETE_FAILURE"
+            message: "An unexpected error occurred while deleting the template from the database."

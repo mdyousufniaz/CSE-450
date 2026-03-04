@@ -1,0 +1,93 @@
+post:
+  tags:
+    - Resolutions
+  summary: Attach an uploaded file as a resolution annexure
+  description: >-
+    Links a previously uploaded file to a specific resolution.
+    This creates a record in the `resolutionAnnexures` table.
+  operationId: attachResolutionAnnexure
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: resolution_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The resolution ID to attach the file to.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - file_id
+          properties:
+            file_id:
+              type: string
+              format: uuid
+              description: The ID of the file to attach.
+              example: "f9b1-78c2-4e11-9a22"
+  responses:
+    '201':
+      description: Created - Resolution annexure linked.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  annexure_id:
+                    type: string
+                    format: uuid
+                    example: "res-ann-001"
+          example:
+            success: true
+            data:
+              annexure_id: "res-ann-001"
+
+    '400':
+      description: Bad Request - Invalid UUID or missing file_id.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+
+    '401':
+      description: Unauthorized.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+
+    '404':
+      description: Not Found - Resolution or File not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RESOURCE_NOT_FOUND"
+            message: "The resolution_id or file_id provided does not exist."
+
+    '409':
+      description: Conflict - This file is already linked to this resolution.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'

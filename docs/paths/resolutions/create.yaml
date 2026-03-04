@@ -1,0 +1,124 @@
+post:
+  tags:
+    - Resolutions
+  summary: Create a resolution for an agenda item
+  description: >-
+    Records the final decision/resolution for a specific agenda item. 
+    This will create an entry in the `resolutions` table and link it to the provided `agenda_id`.
+  operationId: createResolution
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: agenda_id
+      in: path
+      required: true
+      description: The UUID of the agenda item this resolution belongs to.
+      schema:
+        type: string
+        format: uuid
+      example: "ag_507f1f77"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/Resolutions.yaml#/CreateResolutionRequest'
+  responses:
+    '201':
+      description: Created - Resolution successfully recorded.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  resolution_id:
+                    type: string
+                    format: uuid
+                    example: "res_708h2i99"
+          example:
+            success: true
+            data:
+              resolution_id: "res_708h2i99"
+
+    '400':
+      description: Bad Request - Missing required fields or malformed JSON.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_INPUT"
+            message: "The 'body' field is required and cannot be empty."
+
+    '401':
+      description: Unauthorized - User not authenticated.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "Please sign in to record resolutions."
+
+    '403':
+      description: Forbidden - User does not have permission to finalize resolutions.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "PERMISSION_DENIED"
+            message: "Only authorized personnel (Secretary/Admin) can create resolutions."
+
+    '404':
+      description: Not Found - The agenda_id does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AGENDA_NOT_FOUND"
+            message: "The specified agenda item was not found."
+
+    '409':
+      description: Conflict - A resolution already exists for this agenda item.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RESOLUTION_EXISTS"
+            message: "This agenda item already has a resolution. Use PATCH to update it instead."
+
+    '423':
+      description: Locked - The meeting is locked and cannot be modified.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MEETING_LOCKED"
+            message: "The meeting associated with this agenda is already locked."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "An internal database error occurred while saving the resolution."

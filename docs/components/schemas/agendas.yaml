@@ -1,0 +1,73 @@
+CreateAgendaRequest:
+  type: object
+  required:
+    - title
+    - serial
+  properties:
+    title:
+      type: string
+      description: The title of the agendum.
+      example: "Approval of Previous Minutes"
+    serial:
+      type: integer
+      description: The display order/serial number.
+      example: 1
+    body:
+      type: string
+      description: The detailed content of the agenda item.
+      example: "Reviewing the minutes from the 123rd Syndicate meeting held in Feb."
+    is_suppli_agendum:
+      type: boolean
+      description: Whether this is a supplementary agenda item.
+      default: false
+      example: false
+
+MeetingAgendaListResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+    data:
+      type: array
+      items:
+        $ref: '#/AgendaListItem'
+
+AgendaListItem:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "ag_507f1f77"
+    body:
+      type: string
+      description: The content of the agenda item.
+      example: "Proposal for new Faculty appointments."
+    is_suppli_agendum:
+      type: boolean
+      example: false
+    current_version:
+      type: integer
+      example: 1
+    resolution_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: The ID of the linked resolution, if it exists.
+      example: "res_608g2h88"
+
+UpdateAgendaRequest:
+  type: object
+  properties:
+    title:
+      type: string
+      example: "Revised Budget Proposal"
+    serial:
+      type: integer
+      example: 5
+    body:
+      type: string
+      example: "Updated content for the budget discussion including Q3 projections."
+    is_suppli_agendum:
+      type: boolean
+      example: true

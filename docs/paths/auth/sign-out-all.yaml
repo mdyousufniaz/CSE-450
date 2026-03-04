@@ -2,41 +2,70 @@ post:
   tags:
     - Authentication
   summary: Sign out from all devices
-  description: Terminates every active session associated with the authenticated user's account.
+  description: >-
+    Invalidates all active sessions for the current user across all devices and locations. 
+    This action will also clear the current authentication cookie.
   operationId: signOutAll
   security:
     - cookieAuth: []
+    - bearerAuth: []
   responses:
     '200':
-      description: Successfully logged out of all devices
+      description: OK - Successfully logged out of all devices.
       headers:
         Set-Cookie:
-          description: Clears the local session_token cookie.
+          description: Clears the current session_token cookie.
           schema:
             type: string
-            example: session_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly
+            example: session_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=Strict
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: true
-              message:
-                type: string
-                example: "Logged out from all active sessions."
+            $ref: '../../components/schemas/common.yaml#/SuccessWrapper'
+          example:
+            success: true
+            message: "Successfully terminated 5 active sessions across all devices."
 
     '401':
-      description: Unauthorized - No active session found
+      description: Unauthorized - No active session found to perform this action.
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: false
-              message:
-                type: string
-                example: "Unauthorized"
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "You must be authenticated to perform a global sign-out."
+
+    '403':
+      description: Forbidden - Account is restricted or locked.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "ACCOUNT_LOCKED"
+            message: "Global sign-out is unavailable for restricted accounts."
+
+    '429':
+      description: Too Many Requests - Excessive global sign-out attempts.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RATE_LIMIT_EXCEEDED"
+            message: "Too many sign-out requests. Please wait a few minutes."
+
+    '500':
+      description: Internal Server Error - Bulk session invalidation failed.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "GLOBAL_LOGOUT_FAILED"
+            message: "An error occurred while attempting to clear all sessions from the database."

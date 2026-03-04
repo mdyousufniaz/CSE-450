@@ -1,0 +1,86 @@
+delete:
+  tags:
+    - Resolutions
+  summary: Remove an annexure from a resolution
+  description: >-
+    Deletes the link between a file and a resolution in the `resolutionAnnexures` table.
+    This action is restricted if the resolution has already been marked as executed.
+  operationId: deleteResolutionAnnexure
+  parameters:
+    - name: annexure_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+  responses:
+    '200':
+      description: OK - Annexure unlinked successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+          example:
+            success: true
+            message: "Resolution annexure has been removed."
+
+    '401':
+      description: Unauthorized - Bearer token/Cookie missing.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "You must be logged in to modify resolutions."
+
+    '403':
+      description: Forbidden - Business logic or Permission restriction.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "PERMISSION_DENIED"
+            message: "Only the Secretary or Admin can delete resolution attachments."
+
+    '404':
+      description: Not Found - Annexure link does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RESOURCE_NOT_FOUND"
+            message: "The resolution annexure with the specified ID was not found."
+
+    '423':
+      description: Locked - The resolution is already executed.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RESOLUTION_LOCKED"
+            message: "Cannot delete annexures from a resolution that has already been marked as executed."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "An unexpected error occurred on the server while deleting the record."

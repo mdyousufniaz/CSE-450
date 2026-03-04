@@ -1,0 +1,184 @@
+post:
+  tags:
+    - Templates
+  summary: Create a new template
+  description: >-
+    Creates a saved template for a specific participant. 
+    Templates can be used to quickly populate Agenda or Resolution bodies.
+  operationId: createTemplate
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: participant_id
+      in: path
+      required: true
+      description: The UUID of the participant creating the template.
+      schema:
+        type: string
+        format: uuid
+      example: "part_9912-abcd"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/templates.yaml#/CreateTemplateRequest'
+  responses:
+    '201':
+      description: Created - Template successfully saved.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  template_id:
+                    type: string
+                    format: uuid
+                    example: "temp_4455-efgh"
+          example:
+            success: true
+            data:
+              template_id: "temp_4455-efgh"
+
+    '400':
+      description: Bad Request - Missing required "body" field.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MISSING_FIELDS"
+            message: "The 'body' field is required to create a template."
+
+    '401':
+      description: Unauthorized - Invalid session.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+
+    '403':
+      description: Forbidden - You cannot create templates for another participant.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "ACCESS_DENIED"
+            message: "You are not authorized to manage templates for this participant ID."
+
+    '404':
+      description: Not Found - Participant ID does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "PARTICIPANT_NOT_FOUND"
+            message: "No participant record found with the provided ID."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "An unexpected error occurred on the server."
+
+get:
+  tags:
+    - Templates
+  summary: List available templates
+  description: >-
+    Returns a list of templates. You can filter by visibility (public/private) 
+    and type (academic/syndicate).
+  operationId: listTemplates
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: visibility
+      in: query
+      required: false
+      description: Filter by access level.
+      schema:
+        type: string
+        enum: [public, private, both]
+      example: "public"
+    - name: type
+      in: query
+      required: false
+      description: Filter by meeting category.
+      schema:
+        type: string
+        enum: [academic, syndicate]
+      example: "academic"
+  responses:
+    '200':
+      description: OK - Templates retrieved successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/templates.yaml#/TemplateItem'
+          example:
+            success: true
+            data:
+              - id: "temp_1"
+                body: "Template for Academic Council minutes..."
+                visibility: "public"
+                type: "academic"
+              - id: "temp_2"
+                body: "Confidential Syndicate Draft..."
+                visibility: "private"
+                type: "syndicate"
+
+    '400':
+      description: Bad Request - Invalid query parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_FILTER"
+            message: "The 'type' parameter must be either 'academic' or 'syndicate'."
+
+    '401':
+      description: Unauthorized - Login required to see private/departmental templates.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "You must be logged in to modify resolutions."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "An unexpected error occurred on the server while deleting the record."

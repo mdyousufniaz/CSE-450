@@ -1,15 +1,27 @@
 openapi: 3.0.0
 info:
-  title: Auth Service API
+  title: University Meeting & Auth Service API
   version: 1.0.0
-components:
-  securitySchemes:
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: session_token # This must match the name used in sign-in
+  description: API for managing authentication sessions and Syndicate/Academic meetings.
+
+tags:
+  - name: Authentication
+    description: Session management and user identity.
+  - name: Meetings
+    description: Creation and management of university board meetings.
+  - name: Agendas  # New grouping
+    description: Individual topics and items within a meeting.
+  - name: Resolutions
+    description: Final decisions and execution status for agenda items.
+  - name: Files
+    description: File management for annexures and transcripts.
+  - name: Templates
+    description: Pre-defined content formats for Agendas and Resolutions.
+  - name: Tags
+    description: Metadata labels for categorizing meeting content.
 
 paths:
+  # --- Authentication Module ---
   /api/auth/signin:
     $ref: './paths/auth/sign-in.yaml'
   /api/auth/me:
@@ -22,3 +34,62 @@ paths:
     $ref: './paths/auth/sign-out.yaml'
   /api/auth/signout-all:
     $ref: './paths/auth/sign-out-all.yaml'
+
+  # --- Meetings Module ---
+  /api/meetings:
+    $ref: './paths/meetings/list.yaml'
+  /api/meetings/create:
+    $ref: './paths/meetings/create.yaml'
+  /api/meetings/{meeting_id}:
+    $ref: './paths/meetings/get-details.yaml'
+  /api/meetings/{meeting_id}/update:
+    $ref: './paths/meetings/update.yaml'
+  /api/meetings/{meeting_id}/participants:
+    $ref: './paths/meetings/participants.yaml'
+
+  # --- Agendas Module ---
+  /api/meetings/{meeting_id}/agendas:
+    $ref: './paths/agendas/meeting-agendas.yaml'
+  /api/agendas/{agenda_id}:
+    $ref: './paths/agendas/update.yaml'
+  /api/agendas/{agenda_id}/annexures:
+    $ref: './paths/agendas/annexures.yaml'
+  /api/agendas/annexures/{annexure_id}:
+    $ref: './paths/agendas/delete-annexure.yaml'
+
+  # --- Resolutions Module ---
+  /api/agendas/{agenda_id}/resolutions:
+    $ref: './paths/resolutions/create.yaml'
+  /api/resolutions/{resolution_id}:
+    $ref: './paths/resolutions/get&update.yaml'
+  /api/resolutions/{resolution_id}/annexures:
+    $ref: './paths/resolutions/annexures.yaml'
+  /api/resolutions/annexures/{annexure_id}:
+    $ref: './paths/resolutions/delete-annexure.yaml'
+
+  # --- File Module ---
+  /api/files:
+    $ref: './paths/files/upload.yaml'
+
+  # --- Template Module ---
+  /api/participants/{participant_id}/templates:
+    $ref: './paths/templates/create&get.yaml'
+  /api/templates/{template_id}:
+    $ref: './paths/templates/update&delete.yaml'
+  /api/templates/{template_id}/usage:
+    $ref: './paths/templates/increment-usage.yaml'
+  
+  # ---Tag Module ---
+  /api/tags:
+    $ref: './paths/tags/create.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_token

@@ -1,0 +1,102 @@
+post:
+  tags:
+    - Agendas
+  summary: Attach an uploaded file as an annexure
+  description: >-
+    Links a previously uploaded file (via /api/files) to a specific agenda item.
+    This creates a record in the `agendaAnnexures` table.
+  operationId: attachAgendaAnnexure
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: agenda_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The agenda item to attach the file to.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - file_id
+          properties:
+            file_id:
+              type: string
+              format: uuid
+              description: The ID returned from the file upload API.
+              example: "f9b1-78c2-4e11-9a22"
+  responses:
+    '201':
+      description: Created - File linked successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  annexure_id:
+                    type: string
+                    format: uuid
+                  file_path:
+                    type: string
+                    description: The path to access the file.
+          example:
+            success: true
+            data:
+              annexure_id: "annex_123"
+              file_path: "/storage/annexures/budget_report.pdf"
+
+    '400':
+      description: Bad Request - Invalid file ID or missing fields.
+      content:
+        application/json:
+          example:
+            success: false
+            error_code: "INVALID_FILE_REFERENCE"
+            message: "The provided file_id does not exist or has been deleted."
+
+    '403':
+      description: Forbidden - Meeting is locked.
+      content:
+        application/json:
+          example:
+            success: false
+            error_code: "MEETING_LOCKED"
+            message: "Cannot add annexures to a finalized meeting."
+
+    '404':
+      description: Not Found - Agenda item doesn't exist.
+      content:
+        application/json:
+          example:
+            success: false
+            error_code: "AGENDA_NOT_FOUND"
+            message: "The specified agenda item was not found."
+
+    '409':
+      description: Conflict - File already attached.
+      content:
+        application/json:
+          example:
+            success: false
+            error_code: "DUPLICATE_ANNEXURE"
+            message: "This file is already attached to this agenda item."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          example:
+            success: false
+            error_code: "INTERNAL_ERROR"
+            message: "Failed to link file to agenda in the database."

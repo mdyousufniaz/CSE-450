@@ -1,0 +1,84 @@
+delete:
+  tags:
+    - Agendas
+  summary: Remove an annexure from an agenda
+  description: >-
+    Deletes a specific link between a file and an agenda item. 
+    Note: This does NOT delete the physical file from the storage, only the relationship.
+  operationId: deleteAgendaAnnexure
+  parameters:
+    - name: annexure_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: "7e529688-6623-4f91-88f5-3c0f4553f605"
+  responses:
+    '200':
+      description: OK - Annexure removed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+          example:
+            success: true
+            message: "Annexure successfully unlinked from the agenda item."
+
+    '401':
+      description: Unauthorized - No active session found.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "Your session has expired. Please log in again to perform this action."
+
+    '403':
+      description: Forbidden - Action restricted.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          examples:
+            meeting_locked:
+              summary: Meeting is Locked
+              value:
+                success: false
+                error_code: "MEETING_LOCKED"
+                message: "This agenda belongs to a locked or ended meeting. Annexures cannot be removed."
+            insufficient_permissions:
+              summary: Insufficient Permissions
+              value:
+                success: false
+                error_code: "FORBIDDEN"
+                message: "You do not have administrative rights to delete annexures."
+
+    '404':
+      description: Not Found - The annexure ID does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "ANNEXURE_NOT_FOUND"
+            message: "The specified annexure link could not be found. It may have already been deleted."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INTERNAL_SERVER_ERROR"
+            message: "A database error occurred while trying to remove the annexure."

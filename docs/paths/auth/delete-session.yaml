@@ -2,9 +2,10 @@ delete:
   tags:
     - Authentication
   summary: Terminate a specific session
-  description: Revokes a specific session by ID. Users cannot terminate their currently active session via this endpoint.
+  description: Revokes a specific session by ID. This is typically used to log out of other devices remotely.
   operationId: deleteSession
   security:
+    - bearerAuth: []
     - cookieAuth: []
   parameters:
     - name: sessionId
@@ -13,46 +14,81 @@ delete:
       description: The unique ID of the session to terminate.
       schema:
         type: string
-      example: "sess_54321"
+        format: uuid
+      example: "sess_507f1f77bcf86cd799439011"
   responses:
     '200':
-      description: Session successfully terminated
+      description: OK - Session successfully terminated.
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: true
-              message:
-                type: string
-                example: "Session terminated successfully."
+            $ref: '../../components/schemas/common.yaml#/SuccessWrapper'
+          example:
+            success: true
+            message: "Session sess_54321 has been revoked successfully."
 
-    '403':
-      description: Forbidden - Cannot terminate the current active session
+    '400':
+      description: Bad Request - Invalid sessionId format.
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: false
-              message:
-                type: string
-                example: "Cannot remove current session. Please use the sign-out endpoint instead."
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_SESSION_ID"
+            message: "The provided sessionId is not a valid UUID."
 
     '401':
-      description: Unauthorized - Invalid or missing session cookie
+      description: Unauthorized - Session is expired or missing.
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: false
-              message:
-                type: string
-                example: "Unauthorized"
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "You must be logged in to manage sessions."
+
+    '403':
+      description: Forbidden - Attempting to delete the current active session.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "CANNOT_DELETE_CURRENT_SESSION"
+            message: "You cannot terminate your current active session. Use the /sign-out endpoint instead."
+
+    '404':
+      description: Not Found - The sessionId does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SESSION_NOT_FOUND"
+            message: "No active session found with the ID provided."
+
+    '429':
+      description: Too Many Requests - Rate limit exceeded.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RATE_LIMIT_EXCEEDED"
+            message: "Too many session termination attempts. Please try again later."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INTERNAL_SERVER_ERROR"
+            message: "An unexpected error occurred while revoking the session."

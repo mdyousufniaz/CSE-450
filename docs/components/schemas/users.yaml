@@ -1,0 +1,85 @@
+User:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    username:
+      type: string
+    full_name:
+      type: string
+    email:
+      type: string
+      format: email
+    role:
+      type: string
+      enum: [ADMIN_APPROVER, EDITOR, READER]
+    user_type:
+      type: string
+      enum: [STAFF, ACADEMIC, SYNDICATE]
+    is_active:
+      type: boolean
+
+AcademicProfile:
+  type: object
+  properties:
+    faculty:
+      type: string
+    department:
+      type: string
+    designation:
+      type: string
+    seniority_order:
+      type: integer
+    is_internal:
+      type: boolean
+
+SyndicateProfile:
+  type: object
+  properties:
+    institution:
+      type: string
+    department:
+      type: string
+    designation:
+      type: string
+    appointment_date:
+      type: string
+      format: date
+    term_expiry:
+      type: string
+      format: date
+
+UserResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+      example: true
+    data:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        email:
+          type: string
+        role:
+          $ref: '#/UserRole'
+        user_type:
+          $ref: '#/UserCategory'
+        # Conditional: included based on user_type
+        academic_profile:
+          $ref: '#/AcademicProfile'
+        syndicate_profile:
+          $ref: '#/SyndicateProfile'
+
+UserRole:
+  type: string
+  enum: [ADMIN_APPROVER, EDITOR, READER]
+
+UserCategory:
+  type: string
+  enum: [STAFF, ACADEMIC, SYNDICATE]

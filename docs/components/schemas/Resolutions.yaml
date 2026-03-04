@@ -1,0 +1,59 @@
+CreateResolutionRequest:
+  type: object
+  required:
+    - body
+  properties:
+    body:
+      type: string
+      description: The full text of the resolution.
+      example: "It was unanimously resolved that the budget for the new Science Lab be approved."
+    is_executed:
+      type: boolean
+      description: Whether the resolution has been carried out.
+      default: false
+      example: false
+    execution_status:
+      type: string
+      description: Detailed notes on the execution progress.
+      example: "Pending approval from the Finance Committee."
+
+ResolutionDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/ResolutionItem'
+
+ResolutionItem:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    body:
+      type: string
+    current_version:
+      type: integer
+    is_executed:
+      type: boolean
+    execution_status:
+      type: string
+      nullable: true
+
+UpdateResolutionRequest:
+  type: object
+  description: Partial update for a resolution. All fields are optional.
+  properties:
+    body:
+      type: string
+      description: The updated text of the resolution.
+      example: "The board decided to postpone the expansion until Q4."
+    is_executed:
+      type: boolean
+      description: Marks the resolution as completed.
+      example: true
+    execution_status:
+      type: string
+      description: Updates on the progress of the implementation.
+      example: "Tender process completed; contractor selected."

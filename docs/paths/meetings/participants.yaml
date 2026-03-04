@@ -1,0 +1,112 @@
+put:
+  tags:
+    - Meetings
+  summary: Sync meeting participants
+  description: >-
+    Updates the entire participant list for a meeting. 
+    To add members, include them in the array. 
+    To remove a member, omit their ID from the array.
+  operationId: syncParticipants
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: meeting_id
+      in: path
+      required: true
+      description: UUID of the meeting.
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/meetings.yaml#/ParticipantSyncRequest'
+  responses:
+    '200':
+      description: OK - Participant list updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/SuccessWrapper'
+          example:
+            success: true
+            message: "Roster updated. Total participants: 12."
+
+    '400':
+      description: Bad Request - Malformed JSON or invalid ID format.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MALFORMED_REQUEST"
+            message: "The request body is not valid JSON or contains invalid UUID strings."
+
+    '401':
+      description: Unauthorized - User must be logged in.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "You must be authenticated to manage meeting participants."
+
+    '403':
+      description: Forbidden - Insufficient permissions to manage this roster.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "PERMISSION_DENIED"
+            message: "You do not have the required administrative role to modify this meeting's participants."
+
+    '404':
+      description: Not Found - The meeting ID does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MEETING_NOT_FOUND"
+            message: "Cannot add participants to a non-existent meeting."
+
+    '422':
+      description: Unprocessable Entity - One or more member_ids do not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_MEMBERS"
+            message: "The following Member IDs [550e8400-e29b-41d4-a716-446655440000] were not found in the system."
+
+    '423':
+      description: Locked - Meeting is completed and the roster is frozen.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MEETING_LOCKED"
+            message: "This meeting has been finalized/completed. Participant records are now read-only."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INTERNAL_SERVER_ERROR"
+            message: "A database error occurred while updating the participant roster."

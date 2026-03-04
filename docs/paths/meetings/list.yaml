@@ -1,65 +1,107 @@
 get:
   tags:
-    - Meeting Management
-  summary: "List Council Meetings"
-  description: "Retrieves a list of academic and syndicate meetings with their basic metadata."
+    - Meetings
+  summary: List all meetings
+  description: Retrieves a paginated list of meetings with support for filtering by date range, type, and status.
+  operationId: listMeetings
   security:
-    - bearerAuth: [] # Required JWT authentication 
+    - cookieAuth: []
   parameters:
-    - name: type
+    - name: start_date
       in: query
-      description: "Filter by meeting category "
-      required: false
+      description: Filter meetings occurring on or after this date.
       schema:
         type: string
-        enum: [academic, syndicate]
+        format: date
+      example: "2026-01-01"
+    - name: end_date
+      in: query
+      description: Filter meetings occurring on or before this date.
+      schema:
+        type: string
+        format: date
+      example: "2026-12-31"
+    - name: type
+      in: query
+      description: Filter by meeting category.
+      schema:
+        type: string
+        enum: [SYNDICATE, ACADEMIC]
+    - name: status
+      in: query
+      description: Filter by meeting status.
+      schema:
+        type: string
+        enum: [DRAFT, ONGOING, COMPLETED, CANCELLED]
+    - name: sort
+      in: query
+      description: Sort order by date. Defaults to 'desc'.
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+    - name: offset
+      in: query
+      description: Number of items to skip.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    - name: limit
+      in: query
+      description: Number of items to return per page.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
   responses:
     '200':
-      description: "204 OK: Successfully retrieved the list of meetings."
+      description: OK - List of meetings retrieved successfully.
       content:
         application/json:
-          example:
-            - id: "uuid-12345"
-              meetingSerial: "BUET-AC-2026-001"
-              title: "15th Academic Council Meeting"
-              date: "2026-03-15T10:00:00Z"
-              status: "scheduled"
-              category: "academic"
-            - id: "uuid-67890"
-              meetingSerial: "BUET-SYN-2026-004"
-              title: "Syndicate Review Meeting"
-              date: "2026-02-20T14:30:00Z"
-              status: "completed"
-              category: "syndicate"
           schema:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
-                meetingSerial:
-                  type: string
-                title:
-                  type: string
-                date:
-                  type: string
-                  format: date-time
-                status:
-                  type: string
-                  enum: [scheduled, in-progress, completed, archived]
-                category:
-                  type: string
-                  enum: [academic, syndicate]
+            $ref: '../../components/schemas/meetings.yaml#/MeetingListResponse'
+    
+    '206':
+      description: Partial Content - Successful pagination response.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/meetings.yaml#/MeetingListResponse'
+
+    '304':
+      description: Not Modified - Data has not changed since last request.
+
+    '400':
+      description: Bad Request - Invalid query parameters (e.g., end_date before start_date).
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_QUERY_PARAMS"
+            message: "The 'end_date' must be after the 'start_date'."
 
     '401':
-      description: "401 Unauthorized: Invalid or missing JWT token."
+      description: Unauthorized - Session expired.
       content:
         application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
           example:
-            error: "Unauthorized"
-            message: "Authentication is required to view council records."
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "Authentication is required to view the meeting list."
 
     '500':
-      description: "500 Internal Server Error: Database retrieval failure."
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "Failed to fetch meetings from the database."

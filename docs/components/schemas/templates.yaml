@@ -1,0 +1,49 @@
+CreateTemplateRequest:
+  type: object
+  required:
+    - body
+  properties:
+    visibility:
+      type: string
+      enum: [private, public, department]
+      description: Defines who can see/use this template.
+      example: "private"
+    execution_status:
+      type: string
+      description: Optional default execution status for resolutions.
+      example: "Pending Review"
+    body:
+      type: string
+      description: The actual template content. Supports Markdown.
+      example: "It is hereby resolved that [Topic] will be [Action]..."
+
+TemplateItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        body:
+          type: string
+        visibility:
+          type: string
+          enum: [public, private]
+        type:
+          type: string
+          enum: [academic, syndicate]
+
+UpdateTemplateRequest:
+  type: object
+  description: >-
+    All fields are optional. Only the fields provided will be updated.
+  properties:
+    visibility:
+      type: string
+      enum: [public, private]
+      example: "public"
+    execution_status:
+      type: string
+      example: "Draft Approved"
+    body:
+      type: string
+      example: "Updated template content for syndicate meetings."

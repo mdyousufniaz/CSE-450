@@ -5,53 +5,76 @@ get:
   description: Retrieves a list of all active sessions associated with the authenticated user's account.
   operationId: getSessions
   security:
-    - cookieAuth: []
+    - bearerAuth: []
   responses:
     '200':
-      description: A list of active sessions
+      description: OK - A list of active sessions retrieved successfully.
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: true
-              data:
-                type: object
-                properties:
-                  sessions:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          description: The unique session identifier.
-                          example: "sess_12345"
-                        location:
-                          type: string
-                          description: The device or location info provided at sign-in.
-                          example: "Device 2"
-                        is_current:
-                          type: boolean
-                          description: Indicates if this session belongs to the current request.
-                          example: false
-                        created_at:
-                          type: string
-                          format: date-time
-                          example: "2024-03-20T10:00:00Z"
+            $ref: '../../components/schemas/auth.yaml#/SessionListResponse'
+
+    '206':
+      description: Partial Content - Useful if session history is paginated.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth.yaml#/SessionListResponse'
+
+    '304':
+      description: Not Modified - Session list hasn't changed since the last request.
 
     '401':
-      description: Unauthorized - Invalid or missing session cookie
+      description: Unauthorized - Invalid or missing session cookie.
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                example: false
-              message:
-                type: string
-                example: "Unauthorized access"
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "Authentication required to view active sessions."
+
+    '403':
+      description: Forbidden - User account is deactivated.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "ACCOUNT_DEACTIVATED"
+            message: "Your account has been suspended. Please contact the administrator."
+
+    '404':
+      description: Not Found - User record no longer exists.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "USER_NOT_FOUND"
+            message: "The user profile associated with this session could not be found."
+
+    '429':
+      description: Too Many Requests - Rate limit exceeded.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RATE_LIMIT_EXCEEDED"
+            message: "Too many requests. Please wait 60 seconds before trying again."
+
+    '500':
+      description: Internal Server Error - Database connection failed.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "DATABASE_ERROR"
+            message: "A connection error occurred while retrieving the profile."

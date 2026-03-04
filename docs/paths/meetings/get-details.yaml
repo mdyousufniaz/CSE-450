@@ -1,0 +1,85 @@
+get:
+  tags:
+    - Meetings
+  summary: Get meeting details
+  description: Returns full details for a specific meeting including PDF links and transcripts.
+  operationId: getMeetingById
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: meeting_id
+      in: path
+      required: true
+      description: The unique UUID of the meeting.
+      schema:
+        type: string
+        format: uuid
+      example: "meet_507f1f77bcf86cd799439011"
+  responses:
+    '200':
+      description: OK - Detailed meeting object retrieved.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/meetings.yaml#/MeetingDetailResponse'
+
+    '304':
+      description: Not Modified - Local cache is up to date.
+
+    '401':
+      description: Unauthorized - User must be logged in.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "Authentication is required to access meeting documents."
+
+    '403':
+      description: Forbidden - User does not have permission to view this specific meeting type.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "ACCESS_DENIED"
+            message: "You do not have permission to view Syndicate meeting records."
+
+    '404':
+      description: Not Found - The meeting_id does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MEETING_NOT_FOUND"
+            message: "No meeting record found with the provided ID."
+
+    '410':
+      description: Gone - The meeting was archived or deleted permanently.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RESOURCE_GONE"
+            message: "This meeting record has been permanently removed from the system."
+
+    '429':
+      description: Too Many Requests - Rate limiting on document retrieval.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'

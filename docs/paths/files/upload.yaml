@@ -1,0 +1,102 @@
+post:
+  tags:
+    - Files
+  summary: Upload a file chunk
+  description: >-
+    Uploads a file (or file chunk) to the server. 
+    The server validates the file extension (PDF, DOCX, etc.) and size.
+  operationId: uploadFile
+  security:
+    - cookieAuth: []
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            file:
+              type: string
+              format: binary
+              description: The file binary data.
+  responses:
+    '201':
+      description: Created - File uploaded and saved.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  file_id:
+                    type: string
+                    format: uuid
+                    example: "f9b1-78c2-4e11-9a22"
+                  file_path:
+                    type: string
+                    example: "/storage/annexures/budget_2026.pdf"
+          example:
+            success: true
+            data:
+              file_id: "f9b1-78c2-4e11-9a22"
+              file_path: "/storage/annexures/budget_2026.pdf"
+
+    '400':
+      description: Bad Request - Missing file or invalid format.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_FILE"
+            message: "The uploaded file must be a PDF or Word document."
+
+    '401':
+      description: Unauthorized.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "Authentication required to upload annexures."
+
+    '413':
+      description: Payload Too Large - The file exceeds the maximum allowed size (e.g., 20MB).
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "FILE_TOO_LARGE"
+            message: "File size exceeds the 20MB limit."
+
+    '415':
+      description: Unsupported Media Type - Invalid file extension.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNSUPPORTED_TYPE"
+            message: "Only .pdf, .docx, and .png files are allowed."
+
+    '500':
+      description: Internal Server Error - Storage failure.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "STORAGE_ERROR"
+            message: "Failed to write file to the cloud storage."

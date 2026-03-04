@@ -1,0 +1,190 @@
+get:
+  tags:
+    - Resolutions
+  summary: Get resolution details
+  description: >-
+    Fetches the details of a specific resolution by its unique ID. 
+    Useful for tracking the current execution status and content version.
+  operationId: getResolutionDetail
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: resolution_id
+      in: path
+      required: true
+      description: The unique UUID of the resolution.
+      schema:
+        type: string
+        format: uuid
+      example: "res_708h2i99"
+  responses:
+    '200':
+      description: OK - Resolution details retrieved.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Resolutions.yaml#/ResolutionDetailResponse'
+          example:
+            success: true
+            data:
+              id: "res_708h2i99"
+              body: "It was resolved that the laboratory expansion project will commence in May 2026."
+              current_version: 1
+              is_executed: false
+              execution_status: "Awaiting architectural blueprints."
+
+    '401':
+      description: Unauthorized - User must be logged in.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "AUTH_REQUIRED"
+            message: "Authentication is required to view resolution details."
+
+    '403':
+      description: Forbidden - Insufficient permissions to view this resolution.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "ACCESS_DENIED"
+            message: "You do not have permission to view resolutions for this meeting type."
+
+    '404':
+      description: Not Found - The resolution ID does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RESOLUTION_NOT_FOUND"
+            message: "The requested resolution ID was not found in our records."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "An unexpected error occurred on the server."
+
+patch:
+  tags:
+    - Resolutions
+  summary: Update a resolution
+  description: >-
+    Updates an existing resolution. If the `body` is changed, a new version 
+    is created in the `resolution_versions` table.
+  operationId: updateResolution
+  security:
+    - cookieAuth: []
+  parameters:
+    - name: resolution_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/Resolutions.yaml#/UpdateResolutionRequest'
+  responses:
+    '200':
+      description: OK - Resolution updated successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  resolution_id:
+                    type: string
+                    format: uuid
+                    example: "res_708h2i99"
+          example:
+            success: true
+            data:
+              resolution_id: "res_708h2i99"
+
+    '400':
+      description: Bad Request - Malformed JSON or invalid data types.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "INVALID_FORMAT"
+            message: "is_executed must be a boolean value."
+
+    '401':
+      description: Unauthorized.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "UNAUTHORIZED"
+            message: "Authentication is required."
+
+    '403':
+      description: Forbidden - User cannot modify this meeting's resolutions.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "PERMISSION_DENIED"
+            message: "You do not have administrative rights to edit this resolution."
+
+    '404':
+      description: Not Found - Resolution ID does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "RESOLUTION_NOT_FOUND"
+            message: "The resolution you are trying to update does not exist."
+
+    '423':
+      description: Locked - The parent meeting is finalized/ended.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "MEETING_LOCKED"
+            message: "Cannot edit resolution content because the meeting is finalized."
+
+    '500':
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common.yaml#/ErrorResponse'
+          example:
+            success: false
+            error_code: "SERVER_ERROR"
+            message: "An unexpected error occurred on the server."
